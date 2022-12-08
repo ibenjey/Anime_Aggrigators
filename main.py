@@ -18,10 +18,5 @@ get_ghibli(conn)
 # ...
 
 # Call any other functions for calculations, graphs, etc.
-<<<<<<< HEAD
 # make_ghibli_graph()
-=======
-make_ghibli_graph()
 
-
->>>>>>> 1109d51518fe50965070824bc0c174c22ac34b61
