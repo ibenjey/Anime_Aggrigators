@@ -33,9 +33,6 @@ def anime_list_table(cur, conn, anime_info):
     count = cur.execute("SELECT max(id) FROM anime_list").fetchone()[0]
     if count == None:
         count = -1
-# len(anime_info)+1)
-#  count = -1
-# for i in range(count+1,min(count+26),len(anime_info)+1)
     for i in range(count+1,min(count+26,len(anime_info))):
         anime_id = i
         anime_name = anime_info[i][0]
@@ -44,8 +41,7 @@ def anime_list_table(cur, conn, anime_info):
         cur.execute('INSERT or IGNORE INTO anime_list (id, name, score, popularity ) VALUES (?, ?, ?, ?)', (anime_id, anime_name, anime_score, anime_pop))
     conn.commit()
     
-    # except:
-    #     return None
+
 
 
 # maybe one for join table due to duplicate strings 
