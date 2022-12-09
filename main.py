@@ -4,7 +4,7 @@ import animeList
 
 # Have an import for each student's function
 from anime_spotify import *
-
+from animeList import *
 # from student_file_2 import fn_name
 # ....
 
