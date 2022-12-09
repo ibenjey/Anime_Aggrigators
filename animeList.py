@@ -7,7 +7,7 @@ import os
 def anime_process():
     url= 'https://api.jikan.moe/v4/top/anime?page={}'
     anime_info = []
-    for i in range(5):
+    for i in range(1,5):
         u = url.format(i)
         response = requests.get(u)
         val = response.json()
@@ -15,7 +15,7 @@ def anime_process():
         for anime_data in search_result:
             tup = (anime_data['title'], anime_data['score'], anime_data['popularity'])
             anime_info.append(tup)
-    print(anime_info)
+    return(anime_info)
 
 # store into sql databases 
 def database_setup(anime_name):
@@ -32,11 +32,11 @@ def anime_list_table(cur, conn, anime_info):
 
     count = cur.execute("SELECT max(id) FROM anime_list").fetchone()[0]
     if count == None:
-        count = 1
+        count = -1
 # len(anime_info)+1)
 #  count = -1
 # for i in range(count+1,min(count+26),len(anime_info)+1)
-    for i in range(count+1,count+25):
+    for i in range(count+1,min(count+26,len(anime_info))):
         anime_id = i
         anime_name = anime_info[i][0]
         anime_score = float(anime_info[i][1])
