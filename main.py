@@ -14,9 +14,9 @@ conn = sqlite3.connect("anime.db")
 
 # Do each student's functions
 get_ghibli(conn)
+
 # ... call next student's function
 # ...
 
 # Call any other functions for calculations, graphs, etc.
-# make_ghibli_graph()
 
