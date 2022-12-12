@@ -1,5 +1,5 @@
 import sqlite3
-import animeList
+
 
 
 # Have an import for each student's function
@@ -16,8 +16,18 @@ conn = sqlite3.connect("anime.db")
 # Do each student's functions
 get_ghibli(conn)
 
+
 # ... call next student's function
 # ...
 
 # Call any other functions for calculations, graphs, etc.
 
+
+# calling the main function 
+def main ():
+    anime_info = anime_process()
+    cur, conn = database_setup('anime.db')
+    anime_list_table(cur, conn, anime_info)
+
+if __name__ == "__main__":
+    main()
