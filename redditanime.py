@@ -1,7 +1,8 @@
+import pandas as pd
 from pandas import concat, DataFrame
 from requests.auth import HTTPBasicAuth
 from requests import get, post
-
+import os
 
 CLIENT_ID = 'ybzSQ_p5Df4YV9nR1A302g'
 SECRET_KEY = 'jjQ9y93ltDGLnPoAViXgREeb7WHZgQ'
@@ -16,27 +17,33 @@ res = post('https://www.reddit.com/api/v1/access_token', auth=auth, data=data, h
 TOKEN = res.json()['access_token']
 headers = {**headers, **{'Authorization': f"bearer {TOKEN}"}}
 
-DATAFRAME = DataFrame()
-last_id = 't3_zhvbn4'
-#last_id references where we were when we left off
-for _ in range(4):
-#I used the '_' in 'for _ in range(4)' because the iterator is not used in the loop so we do not need to create a new variable.
 
-    res = get('https://oauth.reddit.com/r/anime/new', headers=headers, params={'limit': 25, 'after': last_id})
+
+def add_items(n_items=25):
+
+    dataframe = pd.read_csv('items.csv')
+    if dataframe.shape[0] == 0:
+        last_id = 't3_zhvbn4'
+    else:
+        last_id = dataframe.iloc[-1, -1]
+
+    res = get('https://oauth.reddit.com/r/anime/new', headers=headers, params={'limit': n_items, 'after': last_id})
     res.json()
 
     for i, post in enumerate(res.json()['data']['children']):
-        data = {'subreddit': post['data']['subreddit'],
-                'title': post['data']['title'],
+        data = {'title': post['data']['title'],
                 'selftext': post['data']['selftext'],
                 'upvote_ratio': post['data']['upvote_ratio'],
                 'ups': post['data']['ups'],
                 'downs': post['data']['downs'],
-                'score': post['data']['score']}
+                'score': post['data']['score'],
+                'id': post['kind'] + '_' + post['data']['id']}
         line = DataFrame([data])
-        DATAFRAME = concat([DATAFRAME, line])
-        last_id = post['kind'] + '_' + post['data']['id']
+        dataframe = concat([dataframe, line])
+    dataframe.reset_index(inplace=True, drop=True)
+    dataframe.to_csv('items.csv')
 
-#last id loops the data for fresh results
 
-DATAFRAME.reset_index(inplace=True, drop=True)
+if __name__ == '__main__':
+
+    add_items()
