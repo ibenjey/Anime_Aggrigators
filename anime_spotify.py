@@ -19,47 +19,17 @@ def get_ghibli(conn):
   spotify = spotipy.Spotify(
   client_credentials_manager=SpotifyClientCredentials( ))
     
-    # Artist name
-    
-    # Find the artist-id associated with the name
-    
-    # Then we can look up all of the "tracks" with that artist-id
-    # search(q, limit=10, offset=0, type='track', market=None)
-    #results = spotify.search("Joe Hisaishi", limit=10, type="artist")
-    
-    # results = spotify.search('Joe Hisaishi',
-    #                          type="artist",
-    #                          offset=api_offset,
-    #                          limit=api_limit)
-
-    #print(results)
-    #res = json.dumps(results)
-    #print(json.dumps(results,indent=4))
-    # print(results.keys())
-    # tracks = results['tracks']
-    #print(tracks.keys())
-  '''
-  BEFORE LOOP:
-  Connect to db
-  Create a cursor
-  Drop old tables
-  Create new table with updated definition
-  
-  '''
-   
     # Creates a cursor #
   cur = conn.cursor()
-  #Drop old tables
   cur.execute('DROP TABLE IF EXISTS ghibli_tracks')
-  # Also drop composer table XXXXXXXXXXX
-  
+ 
   # Create the composer table first because tracks table will link to it.
   # id will be the primary key and is the spotify id for the artist/composer
 
   # CREATE composer table ....
   # Create a composers table
   cur.execute("""CREATE TABLE IF NOT EXISTS composers (
-    id    TEXT PRIMARY KEY,
+    art_id    TEXT PRIMARY KEY,
     name  TEXT,
     popularity  INTEGER
     );
@@ -71,15 +41,16 @@ def get_ghibli(conn):
   sql = """
   CREATE TABLE ghibli_tracks (
       album_name   TEXT,
-      id           TEXT PRIMARY KEY,
-      popularity   INTEGER,
+      id           TEXT, 
+      popularity   INTEGER, 
       release_date TEXT,
       composer_id  TEXT,
       genre        TEXT,
       FOREIGN KEY (composer_id) REFERENCES composers (id)
+
   )
   """
-  cur.execute(sql) 
+  cur.execute(sql)
 
   api_limit = 25
   api_offset = 0
@@ -99,10 +70,10 @@ def get_ghibli(conn):
       # Get the specific info from the API results
       album_name = track['album']['name']
       id = track['album']['id']
-      popularity = track['popularity']  # popularity   INTEGER,
-      release_date = track['album']['release_date']  # release_date TEXT,
-      composer_id = track['artists'][0]['id']  # composer     TEXT,
-      #genre = track['artists'][0]['genres']  # genre    TEXT,
+      popularity = track['popularity']  
+      release_date = track['album']['release_date']  
+      composer_id = track['artists'][0]['id']  
+      
   
       # Find the artist's id
       artist_id = track['artists'][0]['id']
@@ -115,10 +86,10 @@ def get_ghibli(conn):
           genre = genre[0]
       else:
           genre = ""
-      #print("GENRE", genre)
+  
 
       # BEFORE DOING tracks table insert, search for composer by artist id and get relevant information.
-      results2 = spotify.artist(composer_id)  # ??????
+      results2 = spotify.artist(composer_id)  
       # INSERT composer information into composer table
       print(results2)
       cur.execute("INSERT OR IGNORE INTO composers (id, name, popularity) VALUES (?,?,?)", (composer_id, results2['name'], results2['popularity']))
@@ -141,76 +112,6 @@ def get_ghibli(conn):
       # If not, increase the offset and loop/search again...
       api_offset += api_limit
 
-
-######### CALCULATIONS ############ 
-    def average_popularity_score(conn,cur):
-      cur.execute( "SELECT * FROM composers ")
-      rows = cur.fetchall()
-      conn.commit()
-
-      sum = 0 
-      for row in rows:
-        sum =+ row[2]
-        avg_popularity = sum/len(rows)
-      
-      print("Average popularity score for artists:", round (avg_popularity, 2))
-
-    
-
-
-
-
-  '''
-
-  
-  
-  count = 1
-  for thing in tracks['items']:
-    #print(thing.keys())
-    #print(thing['album'].keys())
-    print(count, thing['album']['name'])
-    print()
-    count += 1
-  
-      On each pass through the loop:
-  
-      Come up with a way to avoid duplicates...
-  
-      1) Create a query string: "INSERT INTO tablename ... data"
-      2) Execute the query
-      3) Commit the query 
-      
-      '''
-  '''
-  close the cursor ????
-  close the DB connection.
-  
-  
-  
-  
-  artist_id = results['artists']['items'][0]['id']
-  print(artist_id)
-  
-  ghibli_uri = 'spotify:artist:' + artist_id
-  #spotify = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
-  
-  results = spotify.artist_albums(ghibli_uri, album_type='album')
-  
-  albums = results['items']
-  while results['next']:
-      results = spotify.next(results)
-      albums.extend(results['items'])
-  
-  for album in albums:
-      print(album['name'])
-  '''
-  '''
-  Access and store at least 100 items in your database from each API/website (10 points) in at least one table per API/website. For at least one API you must have two tables that share a key (20 points). You must not have duplicate data in your database! Do not split data from one table into two! Also, there should be only one final database!
-  ● You must limit how much data you store from an API into the database each time you execute your code to 25 or fewer items (60 points). The data must be stored in a SQLite database. This means that you must run the code that stores the data multiple times to gather at least 100 items total without duplicating existing data or changing it.
-  '''
-
- 
-
   
   cur.close()
   conn.close()
@@ -218,6 +119,12 @@ def get_ghibli(conn):
 
 
 
-def make_ghibli_graph():
+# def make_ghibli_graph():
   
-  "SELECT * FROM ghibli_tracks ORDER BY popularity DESC LIMIT 10"
+  
+## TO DO ##
+
+# limit the load to 25 data entries per run
+# write a join statment
+# assign primary keys to integer types in both tables
+# have to fix the duplicate data in one of my tables since the IDs are strings 
