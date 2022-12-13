@@ -40,16 +40,7 @@ def anime_list_table(cur, conn, anime_info):
         anime_pop = float(anime_info[i][2])
         cur.execute('INSERT or IGNORE INTO anime_list (id, name, score, popularity ) VALUES (?, ?, ?, ?)', (anime_id, anime_name, anime_score, anime_pop))
     conn.commit()
-    
 
-
-
-# maybe one for join table due to duplicate strings 
-# def anime_name_table(cur, conn, anime_info):
-#     cur.execute ("CREATE TABLE IF NOT EXIST anime name")
-#     for i in anime_info:
-#         name = anime_info[i][0]
-#     print(name)
 
 # calling the main function 
 def main ():
