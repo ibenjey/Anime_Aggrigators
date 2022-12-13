@@ -64,6 +64,8 @@ def plot_hist(cur):
     ax2.set_title('Distribution of the titles length', fontweight='bold')
 
 
+
+
 if __name__ == '__main__':
 
     CURSOR, CONNECT = create_cursor()
