@@ -14,7 +14,7 @@ def create_cursor():
 def make_quote_table(data, cur, conn):
 
     cur.execute("""CREATE TABLE IF NOT EXISTS Quote 
-    (subreddit TEXT, title TEXT PRIMARY KEY, selftext TEXT, upvote_ratio INTEGER)""")
+    (title TEXT PRIMARY KEY, selftext TEXT, upvote_ratio INTEGER)""")
 
     for _, row in data.iterrows():
         title = row['title']
