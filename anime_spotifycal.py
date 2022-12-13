@@ -2,12 +2,17 @@ import sqlite3
 import os 
 import matplotlib.pyplot as plt
 import numpy as np
+import csv
 
 def database_setup(anime_name):
-    path = os.path.dirname(os.path.abspath(__file__))
-    conn = sqlite3.connect(path+'/'+anime_name)
+    _path = os.path.dirname(os.path.abspath(__file__))
+    conn = sqlite3.connect(_path+'/'+anime_name)
     cur = conn.cursor()
     return cur, conn 
+
+### writing calculations to text file ####
+f = open('spotify_data.csv', "w")
+writer = csv.writer(f)
 
 # calculating avg artist popularity #
 def average_popularity_scores(conn,cur):
@@ -17,7 +22,7 @@ def average_popularity_scores(conn,cur):
 
     sum = 0 
     for row in rows:
-        sum += row[2]
+        sum += row[3]
         avg_popularity = sum/len(rows)
     
      
@@ -33,9 +38,9 @@ def average_popularity_scores(conn,cur):
     sum = 0 
     for row in rows:
         sum += row[2]
-        avg_row = sum /len(rows)
+        avg_row_top = sum /len(rows)
 
-    print("Average of top 10 popularity scores", round(avg_row,2))
+    print("Average of top 10 popularity scores", round(avg_row_top,2))
 
     ## BOTTOM 10 popularity ranking ##
 
@@ -48,67 +53,68 @@ def average_popularity_scores(conn,cur):
     for row in rows:
         sum += row[2]
         avg_row = sum /len(rows)
-
+    print(avg_row)
     print("Average of lower 10 popularity scores", round(avg_row,2))
-    return (average_popularity_scores)  
     
+    ## writes cvs ##
+    header = ["Group", "Average Album Popularity"]
+    writer.writerow(header)
+    row_1 = ['Top 10 pop', avg_row_top]
+    row_2 = ['Bottom 10 pop', avg_row]
+    writer.writerow(row_1)
+    writer.writerow(row_2)
    
-   ##### Release date data #####
-def plot_release_dates(conn,cur):
-    cur.execute("SELECT release_date FROM ghibli_tracks ORDER BY release_date limit 100")
-    dates = cur.fetchall()
-    print(dates)
-    conn.commit()
-    
-    return (plot_release_dates)
-### trying to plot release date oover time ###
-    plt.style.use('_mpl-gallery')
+def avg_album_pop_vis():
+    x = ['Top 10, Bottom 10']
+    top_int = [61.7]
+    bottom_int = [20.6]
 
-# make data
-    x = np.linspace(plot_release_date)
-    y = 4 + 2 * np.sin(2 * x)
+    x_axis = np.arange(len(x))
 
-    # plot
-    fig, ax = plt.subplots()
+    plt.bar(x_axis - 0.02,top_int, 0.04, label = 'Top Average')
+    plt.bar(x_axis + 0.02, bottom_int, 0.04, label = 'Bottom Average')
 
-    ax.plot(x, y, linewidth=2.0)
-
-    ax.set(xlim=(0, 8), xticks=np.arange(1, 8),
-        ylim=(0, 8), yticks=np.arange(1, 8))
-
+    plt.xticks(x_axis, x)
+    plt.xlabel("Compared Popularity Averages")
+    plt.ylabel("Score Integers")
+    plt.title("Average Ghibli Album Scores")
+    plt.legend()
     plt.show()
 
-
    
    
    
+  #### JOINING ghibli_tracks table with composers table and writing a scatter plot to see a correlation ####
+def plot_release_dates(conn,cur):
+    #cur.execute("SELECT release_date FROM ghibli_tracks ORDER BY release_date limit 100")
+    cur.execute('''
+    SELECT release_date, composers.popularity
+    FROM ghibli_tracks 
+    LEFT JOIN composers ON ghibli_tracks.composer_id = composers.id
+    ORDER BY release_date limit 50
+    ''')
+    rows = cur.fetchall()
+    y = []
+    for row in rows:
+        print(row)
+        y.append(row[1])
+
+    x = list(range(0,len(rows)))
+    plt.scatter(x, y)
+    plt.xlabel("Release Dates Past to Present")
+    plt.ylabel("Popularity Scores")
+    plt.title("Popularity Scores Plotted by the Release Dates")
+    plt.show()
+    
+
    
-   
-    ### pie chart popularity avg ###
-
-plt.style.use('_mpl-gallery-nogrid')
-
-
-# make data
-x = [26.32,61.7,0]
-colors = plt.get_cmap('Blues')(np.linspace(0.2, 0.7, len(x)))
-
-# plot
-fig, ax = plt.subplots()
-ax.pie(x, colors=colors, radius=3, center=(4, 4),
-       wedgeprops={"linewidth": 1, "edgecolor": "white"}, frame=True)
-
-ax.set(xlim=(0, 8), xticks=np.arange(1, 8),
-       ylim=(0, 8), yticks=np.arange(1, 8))
-
-plt.show()
-
 
 
 def main():
     cur, conn = database_setup('anime.db')
     average_popularity_scores(conn, cur)
     plot_release_dates(conn,cur)
+    avg_album_pop_vis()
 
 
 if __name__ == "__main__":
@@ -118,4 +124,4 @@ if __name__ == "__main__":
 # TO DO #
 
 # write the outcome into csv file 
-#create two visualizations 
+#write calculation that pulls from both composers and ghibli table. 
