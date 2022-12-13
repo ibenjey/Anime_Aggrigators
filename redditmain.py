@@ -6,7 +6,7 @@ from pandas import read_csv
 
 def create_cursor():
 
-    conn = connect('anime')
+    conn = connect('anime.db')
     cur = conn.cursor()
     return cur, conn
 
